@@ -28,6 +28,7 @@ export class UserResolver {
     @Arg("options") options: RegisterInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
+    console.log(req)
     const { email, username, password } = options
 
     const hashedPassword = await argon2.hash(password)

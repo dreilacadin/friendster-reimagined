@@ -60,7 +60,7 @@ const main = async () => {
     })
   })
 
-  apolloServer.applyMiddleware({ app })
+  apolloServer.applyMiddleware({ app, cors: false })
 
   app.listen(envPort(), () => {
     console.log(`🚀 Server Started at PORT: ${envPort()}`)
