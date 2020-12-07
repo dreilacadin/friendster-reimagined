@@ -11,6 +11,7 @@ import session from "express-session"
 import connectRedis from "connect-redis"
 import redis from "redis"
 import { COOKIE_NAME, __prod__ } from "./constants"
+import { GraphQLError } from "graphql"
 
 export const app: express.Application = express()
 
@@ -54,6 +55,13 @@ const main = async () => {
     schema: await buildSchema({
       resolvers: [UserResolver, TestimonialResolver]
     }),
+    formatError: (err: GraphQLError) => {
+      if (err.message.includes("Argument Validation Error")) {
+        return err.extensions?.exception.validationErrors
+      }
+
+      return err
+    },
     context: ({ req, res }) => ({
       req,
       res

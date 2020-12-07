@@ -3,6 +3,7 @@ import argon2 from "argon2"
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql"
 import { COOKIE_NAME } from "../constants"
 import { User } from "../entity/User"
+import { LoginInput } from "../InputTypes/LoginInput"
 import { RegisterInput } from "../InputTypes/RegisterInput"
 import { MyContext } from "../types"
 
@@ -28,7 +29,6 @@ export class UserResolver {
     @Arg("options") options: RegisterInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
-    console.log(req)
     const { email, username, password } = options
 
     const hashedPassword = await argon2.hash(password)
@@ -53,10 +53,10 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("usernameOrEmail") usernameOrEmail: string,
-    @Arg("password") password: string,
+    @Arg("options") options: LoginInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
+    const { usernameOrEmail, password } = options
     const user = await User.findOne({
       where: usernameOrEmail.includes("@")
         ? { email: usernameOrEmail }

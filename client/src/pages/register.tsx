@@ -1,13 +1,13 @@
-import { gql, useMutation } from "@apollo/client"
-import { Container, Heading, Button, Box } from "@chakra-ui/react"
+import { Box, Button, Container, Heading } from "@chakra-ui/react"
 import { Form, Formik } from "formik"
 import InputField from "../components/InputField"
 import { useRegisterMutation } from "../generated/graphql"
+import { toErrorMap } from "../utils/toErrorMap"
+import { useRouter } from "next/router"
 
-interface registerProps {}
-
-const Register: React.FC<registerProps> = ({}) => {
-  const [register] = useRegisterMutation()
+const Register = () => {
+  const router = useRouter()
+  const [register, { loading }] = useRegisterMutation()
 
   return (
     <Container maxW="lg" mt={10}>
@@ -23,16 +23,23 @@ const Register: React.FC<registerProps> = ({}) => {
       </Box>
       <Formik
         initialValues={{ username: "", email: "", password: "" }}
-        onSubmit={(values) => {
-          return register({ variables: values })
+        onSubmit={(values, { setErrors }) => {
+          register({ variables: values })
+            .then((response) => {
+              if (response.data?.register.user) {
+                const { username } = response.data.register.user
+                router.replace(`/${username}`)
+              }
+            })
+            .catch((error) => setErrors(toErrorMap(error.graphQLErrors[0])))
         }}
       >
-        {({ isSubmitting }) => (
+        {() => (
           <Form>
             <InputField label="Username" name="username" placeholder="Mark Zuckerberg" />
             <InputField label="Email" name="email" placeholder="friendsterv2@foreal.com" />
             <InputField label="Password" name="password" type="password" placeholder="********" />
-            <Button isLoading={isSubmitting} type="submit" colorScheme="teal" mt={6} width="100%">
+            <Button isLoading={loading} type="submit" colorScheme="teal" mt={6} width="100%">
               Register
             </Button>
           </Form>
