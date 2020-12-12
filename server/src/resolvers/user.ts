@@ -1,4 +1,4 @@
-import { ApolloError, UserInputError } from "apollo-server-express"
+import { ApolloError } from "apollo-server-express"
 import argon2 from "argon2"
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql"
 import { COOKIE_NAME } from "../constants"
@@ -6,9 +6,21 @@ import { User } from "../entity/User"
 import { LoginInput } from "../InputTypes/LoginInput"
 import { RegisterInput } from "../InputTypes/RegisterInput"
 import { MyContext } from "../types"
+import { validateLogin } from "../utils/validateLogin"
+import { validateRegister } from "../utils/validateRegister"
 
 @ObjectType()
+class FieldError {
+  @Field()
+  field: string
+  @Field()
+  message: string
+}
+@ObjectType()
 class UserResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[]
+
   @Field(() => User, { nullable: true })
   user?: User
 }
@@ -29,6 +41,9 @@ export class UserResolver {
     @Arg("options") options: RegisterInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
+    const errors = validateRegister(options)
+    if (errors) return { errors }
+
     const { email, username, password } = options
 
     const hashedPassword = await argon2.hash(password)
@@ -40,9 +55,9 @@ export class UserResolver {
     } catch (err) {
       // Duplicate username error
       if (err.code === "23505" || err.detail.includes("already exists")) {
-        throw new UserInputError("Email already taken", {
-          invalid_input: email
-        })
+        return {
+          errors: [{ field: "email", message: "Email already taken" }]
+        }
       }
     }
 
@@ -56,6 +71,9 @@ export class UserResolver {
     @Arg("options") options: LoginInput,
     @Ctx() { req }: MyContext
   ): Promise<UserResponse> {
+    const errors = validateLogin(options)
+    if (errors) return { errors }
+
     const { usernameOrEmail, password } = options
     const user = await User.findOne({
       where: usernameOrEmail.includes("@")
@@ -63,15 +81,25 @@ export class UserResolver {
         : { username: usernameOrEmail }
     })
     if (!user) {
-      throw new UserInputError("That username or email doesn't exist", {
-        invalid_input: usernameOrEmail
-      })
+      return {
+        errors: [
+          {
+            field: "usernameOrEmail",
+            message: "That username doesn't exist"
+          }
+        ]
+      }
     }
     const valid = await argon2.verify(user.password, password)
     if (!valid) {
-      throw new UserInputError("Password is incorrect", {
-        invalid_input: password
-      })
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "Incorrect password"
+          }
+        ]
+      }
     }
 
     req.session.userId = user.id

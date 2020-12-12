@@ -1,3 +1,4 @@
+import ColorModeSwitch from "../ColorModeSwitch"
 import styles from "./Footer.module.scss"
 const Footer = () => {
   return (
@@ -9,6 +10,7 @@ const Footer = () => {
       >
         Powered by <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
       </a>
+      <ColorModeSwitch />
     </footer>
   )
 }

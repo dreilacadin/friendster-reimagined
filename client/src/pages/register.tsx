@@ -23,15 +23,23 @@ const Register = () => {
       </Box>
       <Formik
         initialValues={{ username: "", email: "", password: "" }}
-        onSubmit={(values, { setErrors }) => {
-          register({ variables: values })
-            .then((response) => {
-              if (response.data?.register.user) {
-                const { username } = response.data.register.user
-                router.replace(`/${username}`)
-              }
-            })
-            .catch((error) => setErrors(toErrorMap(error.graphQLErrors[0])))
+        onSubmit={async (values, { setErrors }) => {
+          const response = await register({ variables: values })
+          if (response.data?.register.errors) {
+            const { errors } = response.data.register
+            setErrors(toErrorMap(errors))
+          } else if (response.data?.register.user) {
+            const { username } = response.data.register.user
+            router.replace(`/${username}`)
+          }
+          // register({ variables: values })
+          //   .then((response) => {
+          //     if (response.data?.register.user) {
+          //       const { username } = response.data.register.user
+          //       router.replace(`/${username}`)
+          //     }
+          //   })
+          //   .catch((error) => setErrors(toErrorMap(error.graphQLErrors[0])))
         }}
       >
         {() => (

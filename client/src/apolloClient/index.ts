@@ -1,8 +1,8 @@
-import { HttpLink, ApolloClient, InMemoryCache } from "@apollo/client"
+import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client"
 import { onError } from "@apollo/client/link/error"
 import { createStandaloneToast } from "@chakra-ui/react"
 
-const httpLink = new HttpLink({ uri: "http://localhost:4000/graphql" })
+const httpLink = createHttpLink({ uri: process.env.NEXT_PUBLIC_API_URL, credentials: "include" })
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   const toast = createStandaloneToast()
@@ -24,6 +24,5 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 export default new ApolloClient({
   link: errorLink.concat(httpLink),
-  credentials: "include",
   cache: new InMemoryCache()
 })

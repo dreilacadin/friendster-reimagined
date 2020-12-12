@@ -1,22 +1,16 @@
 import Head from "next/head"
-import styles from "../styles/Home.module.scss"
-import ColorModeSwitch from "../components/ColorModeSwitch"
-import Footer from "../components/Footer/Footer"
 import LandingPage from "../components/LandingPage/LandingPage"
+import Layout from "../components/Layout/Layout"
 
 export default function Home() {
   return (
-    <div className={styles.container}>
-      <ColorModeSwitch />
+    <div>
       <Head>
-        <title>Create Next App</title>
+        <title>Friendster v2</title>
       </Head>
-
-      <main className={styles.main}>
+      <Layout>
         <LandingPage />
-      </main>
-
-      <Footer></Footer>
+      </Layout>
     </div>
   )
 }

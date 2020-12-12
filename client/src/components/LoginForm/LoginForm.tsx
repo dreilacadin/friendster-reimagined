@@ -1,10 +1,11 @@
-import { Box, Button, Divider, Link } from "@chakra-ui/react"
+import { Box, Button, Divider } from "@chakra-ui/react"
 import { Form, Formik } from "formik"
 import { toErrorMap } from "../../utils/toErrorMap"
 import InputField from "../InputField"
 import Card from "../Card/Card"
 import { useLoginMutation } from "../../generated/graphql"
 import { useRouter } from "next/router"
+import Link from "next/link"
 
 const LoginForm = () => {
   const router = useRouter()
@@ -14,15 +15,15 @@ const LoginForm = () => {
     <Card>
       <Formik
         initialValues={{ usernameOrEmail: "", password: "" }}
-        onSubmit={(values, { setErrors }) => {
-          login({ variables: values })
-            .then((response) => {
-              if (response.data?.login.user) {
-                const { username } = response.data.login.user
-                router.replace(`/${username}`)
-              }
-            })
-            .catch((error) => setErrors(toErrorMap(error.graphQLErrors[0])))
+        onSubmit={async (values, { setErrors }) => {
+          const response = await login({ variables: values })
+          if (response.data?.login.errors) {
+            const { errors } = response.data.login
+            setErrors(toErrorMap(errors))
+          } else if (response.data?.login.user) {
+            const { username } = response.data.login.user
+            router.replace(`/${username}`)
+          }
         }}
       >
         {() => (
@@ -40,11 +41,13 @@ const LoginForm = () => {
         )}
       </Formik>
       <Box textAlign="center" my={3} color="blue.500" fontSize="sm">
-        <Link>Forgotten password?</Link>
+        <Link href="/forgot-password">Forgotten password?</Link>
       </Box>
       <Divider />
       <Box textAlign="center" mt={4}>
-        <Button colorScheme="blue">Create New Account</Button>
+        <Link href="/register">
+          <Button colorScheme="blue">Create New Account</Button>
+        </Link>
       </Box>
     </Card>
   )
