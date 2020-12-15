@@ -1,8 +1,5 @@
 import { ConnectionOptions } from "typeorm"
-import path from "path"
 import { __prod__ } from "./constants"
-
-const isCompiled = path.extname(__filename).includes("js")
 
 export default {
   type: "postgres",
@@ -14,8 +11,8 @@ export default {
   synchronize: !process.env.DB_NO_SYNC,
   logging: !__prod__,
   autoReconnect: true,
-  entities: [`dist/entity/*.${isCompiled ? "js" : "ts"}`],
-  migrations: [`dist/migration/*.${isCompiled ? "js" : "ts"}`],
+  entities: [`dist/entity/*.js`],
+  migrations: [`dist/migration/*.js`],
   cli: {
     entitiesDir: "src/entity",
     migrationsDir: "src/migration"

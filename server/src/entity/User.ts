@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql"
+import { Field, ID, ObjectType, registerEnumType } from "type-graphql"
 import {
   BaseEntity,
   Column,
@@ -7,6 +7,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm"
+import { UserGender } from "../enums"
+
+registerEnumType(UserGender, {
+  name: "UserGender",
+  description: "Gender options"
+})
 
 @ObjectType()
 @Entity()
@@ -22,6 +28,22 @@ export class User extends BaseEntity {
   @Field()
   @Column({ unique: true })
   email!: string
+
+  @Field()
+  @Column()
+  firstName!: string
+
+  @Field()
+  @Column()
+  lastName!: string
+
+  @Field()
+  @Column()
+  dateOfBirth!: Date
+
+  @Field(() => UserGender, { nullable: true })
+  @Column()
+  gender: UserGender
 
   @Column()
   password!: string

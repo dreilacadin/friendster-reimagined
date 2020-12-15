@@ -44,19 +44,31 @@ export class UserResolver {
     const errors = validateRegister(options)
     if (errors) return { errors }
 
-    const { email, username, password } = options
+    const { email, username, firstName, lastName, dateOfBirth, gender, password } = options
 
     const hashedPassword = await argon2.hash(password)
 
     let user
 
     try {
-      user = await User.create({ email, username, password: hashedPassword }).save()
+      user = await User.create({
+        email,
+        username,
+        firstName,
+        lastName,
+        dateOfBirth,
+        gender,
+        password: hashedPassword
+      }).save()
     } catch (err) {
       // Duplicate username error
-      if (err.code === "23505" || err.detail.includes("already exists")) {
+      if (err.code === "23505") {
         return {
           errors: [{ field: "email", message: "Email already taken" }]
+        }
+      } else if (err.code === "22007") {
+        return {
+          errors: [{ field: "dateOfBirth", message: "Invalid date format" }]
         }
       }
     }
@@ -120,5 +132,12 @@ export class UserResolver {
         resolve(true)
       })
     })
+  }
+
+  @Mutation(() => Boolean)
+  async deleteAllUsers() {
+    const response = await User.delete({})
+    if (!response) return false
+    return true
   }
 }

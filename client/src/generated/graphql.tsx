@@ -26,10 +26,21 @@ export type User = {
   id: Scalars['ID'];
   username: Scalars['String'];
   email: Scalars['String'];
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  dateOfBirth: Scalars['DateTime'];
+  gender?: Maybe<UserGender>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
 };
 
+
+/** Gender options */
+export enum UserGender {
+  Male = 'MALE',
+  Female = 'FEMALE',
+  Custom = 'CUSTOM'
+}
 
 export type Testimonial = {
   __typename?: 'Testimonial';
@@ -44,6 +55,7 @@ export type Mutation = {
   register: UserResponse;
   login: UserResponse;
   logout: Scalars['Boolean'];
+  deleteAllUsers: Scalars['Boolean'];
   createTestimonial: Testimonial;
 };
 
@@ -77,6 +89,10 @@ export type FieldError = {
 export type RegisterInput = {
   username: Scalars['String'];
   email: Scalars['String'];
+  firstName: Scalars['String'];
+  lastName: Scalars['String'];
+  dateOfBirth: Scalars['DateTime'];
+  gender: Scalars['String'];
   password: Scalars['String'];
 };
 
@@ -96,7 +112,7 @@ export type RegularErrorFragment = (
 
 export type RegularUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username'>
+  & Pick<User, 'id' | 'username' | 'firstName' | 'lastName'>
 );
 
 export type LoginMutationVariables = Exact<{
@@ -128,9 +144,7 @@ export type LogoutMutation = (
 );
 
 export type RegisterMutationVariables = Exact<{
-  username: Scalars['String'];
-  email: Scalars['String'];
-  password: Scalars['String'];
+  options: RegisterInput;
 }>;
 
 
@@ -169,6 +183,8 @@ export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   id
   username
+  firstName
+  lastName
 }
     `;
 export const LoginDocument = gql`
@@ -240,8 +256,8 @@ export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const RegisterDocument = gql`
-    mutation Register($username: String!, $email: String!, $password: String!) {
-  register(options: {username: $username, email: $email, password: $password}) {
+    mutation Register($options: RegisterInput!) {
+  register(options: $options) {
     user {
       ...RegularUser
     }
@@ -267,9 +283,7 @@ export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, Regis
  * @example
  * const [registerMutation, { data, loading, error }] = useRegisterMutation({
  *   variables: {
- *      username: // value for 'username'
- *      email: // value for 'email'
- *      password: // value for 'password'
+ *      options: // value for 'options'
  *   },
  * });
  */

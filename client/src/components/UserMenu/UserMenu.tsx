@@ -24,10 +24,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const apollo = useApolloClient()
   return (
     <Menu>
-      <MenuButton as={Button} variant="ghost">
+      <MenuButton as={Button} variant="ghost" p={3}>
         <Flex alignItems="center">
           <Box mr="3">
-            <Text fontWeight="semibold">{user.username}</Text>
+            <Text fontWeight="semibold">{`${user.firstName} ${user.lastName}`}</Text>
           </Box>
           <Avatar size="xs">
             <AvatarBadge boxSize="1.25em" bg="green.500" />

@@ -2,14 +2,16 @@ import Footer from "../Footer/Footer"
 import NavBar from "../NavBar/NavBar"
 import styles from "../../styles/Home.module.scss"
 
-interface LayoutProps {}
+interface LayoutProps {
+  exclude?: Array<string>
+}
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ exclude, children }) => {
   return (
     <div className={styles.container}>
-      <NavBar />
+      {!exclude?.includes("header") && <NavBar />}
       <main className={styles.main}>{children}</main>
-      <Footer />
+      {!exclude?.includes("footer") && <Footer />}
     </div>
   )
 }
