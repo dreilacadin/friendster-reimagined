@@ -13,15 +13,35 @@ import {
   MenuDivider,
   MenuGroup
 } from "@chakra-ui/react"
-import { RegularUserFragment, useLogoutMutation } from "../../generated/graphql"
+import { useRouter } from "next/router"
+import {
+  MeDocument,
+  MeQuery,
+  RegularUserFragment,
+  useLogoutMutation
+} from "../../generated/graphql"
 
 interface UserMenuProps {
   user: RegularUserFragment
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
-  const [logout, { loading: logoutFetching }] = useLogoutMutation()
-  const apollo = useApolloClient()
+  const [logout] = useLogoutMutation()
+  const { cache } = useApolloClient()
+  const router = useRouter()
+
+  const evictCachedUser = () => {
+    const cachedUser: MeQuery | null = cache.readQuery({ query: MeDocument })
+    cache.evict({ id: `User:${cachedUser?.me?.id}` })
+    cache.gc()
+  }
+
+  const logoutHandler = async () => {
+    await logout()
+    evictCachedUser()
+    router.replace("/")
+  }
+
   return (
     <Menu>
       <MenuButton as={Button} variant="ghost" p={3}>
@@ -36,19 +56,12 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
       </MenuButton>
       <MenuList>
         <MenuGroup title="Profile">
-          <MenuItem>My Account</MenuItem>
+          <MenuItem onClick={() => router.push(`${user.username}`)}>My Account</MenuItem>
           <MenuItem>Payments </MenuItem>
         </MenuGroup>
         <MenuDivider />
         <MenuGroup title="Actions">
-          <MenuItem
-            onClick={async () => {
-              await logout()
-              apollo.resetStore()
-            }}
-          >
-            Logout
-          </MenuItem>
+          <MenuItem onClick={logoutHandler}>Logout</MenuItem>
         </MenuGroup>
       </MenuList>
     </Menu>

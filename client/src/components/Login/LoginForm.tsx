@@ -1,15 +1,15 @@
 import { Box, Button, Divider } from "@chakra-ui/react"
 import { Form, Formik } from "formik"
-import { toErrorMap } from "../../utils/toErrorMap"
-import InputField from "../InputField"
-import Card from "../Card/Card"
-import { useLoginMutation } from "../../generated/graphql"
-import { useRouter } from "next/router"
 import Link from "next/link"
+import { useRouter } from "next/router"
+import { useLoginMutation } from "../../generated/graphql"
+import { toErrorMap } from "../../utils/toErrorMap"
+import Card from "../Card/Card"
+import InputField from "../InputField"
 
 const LoginForm = () => {
   const router = useRouter()
-  const [login, { loading }] = useLoginMutation()
+  const [login, { loading }] = useLoginMutation({ refetchQueries: ["Me"] })
 
   return (
     <Card>
@@ -21,8 +21,11 @@ const LoginForm = () => {
             const { errors } = response.data.login
             setErrors(toErrorMap(errors))
           } else if (response.data?.login.user) {
-            const { username } = response.data.login.user
-            router.replace(`/${username}`)
+            if (typeof router.query.next === "string") {
+              router.push(router.query.next)
+            } else {
+              router.replace(`/`)
+            }
           }
         }}
       >

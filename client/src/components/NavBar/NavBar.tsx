@@ -1,7 +1,6 @@
-import { Flex, Link, Heading, Box, useColorModeValue } from "@chakra-ui/react"
+import { Flex, Heading, Link, useColorModeValue } from "@chakra-ui/react"
 import NextLink from "next/link"
-import { useEffect, useState } from "react"
-import { RegularUserFragment, useMeQuery } from "../../generated/graphql"
+import { useMeQuery } from "../../generated/graphql"
 import SearchBar from "../SearchBar/SearchBar"
 import UserMenu from "../UserMenu/UserMenu"
 
@@ -11,15 +10,8 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ props }) => {
   const { data } = useMeQuery()
-  const [loggedInUser, setLoggedInUser] = useState<RegularUserFragment | null>(null)
   const boxShadow = "0 2px 4px rgba(0, 0, 0, .1), 0 8px 16px rgba(0, 0, 0, .1);"
   const bg = useColorModeValue("white", "gray.600")
-
-  useEffect(() => {
-    if (data?.me) {
-      setLoggedInUser(data.me)
-    }
-  }, [data])
 
   return (
     <Flex
@@ -43,8 +35,8 @@ const Navbar: React.FC<NavbarProps> = ({ props }) => {
             </Link>
           </NextLink>
         </Flex>
-        {loggedInUser && <SearchBar />}
-        {loggedInUser && <UserMenu user={loggedInUser} />}
+        {data?.me && <SearchBar />}
+        {data?.me && <UserMenu user={data.me} />}
       </Flex>
     </Flex>
   )

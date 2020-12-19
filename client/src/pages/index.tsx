@@ -1,16 +1,10 @@
-import Head from "next/head"
-import LandingPage from "../components/LandingPage/LandingPage"
+import HomePage from "../components/HomePage/HomePage"
 import Layout from "../components/Layout/Layout"
 
 export default function Home() {
   return (
-    <div>
-      <Head>
-        <title>Friendster v2</title>
-      </Head>
-      <Layout>
-        <LandingPage />
-      </Layout>
-    </div>
+    <Layout>
+      <HomePage />
+    </Layout>
   )
 }

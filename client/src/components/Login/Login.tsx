@@ -1,9 +1,7 @@
 import { Box, Flex, Heading, SimpleGrid } from "@chakra-ui/react"
-import LoginForm from "../LoginForm/LoginForm"
+import LoginForm from "./LoginForm"
 
-interface LandingPageProps {}
-
-const LandingPage: React.FC<LandingPageProps> = ({}) => {
+const Login = () => {
   return (
     <Flex align="center" justify="center" grow={1}>
       <SimpleGrid columns={[1, 1, 1, 2]} spacing={10}>
@@ -18,4 +16,4 @@ const LandingPage: React.FC<LandingPageProps> = ({}) => {
   )
 }
 
-export default LandingPage
+export default Login

@@ -17,7 +17,13 @@ const InputField: React.FC<InputFieldProps> = ({ label, textArea, size: _, ...pr
         {textArea ? (
           <Textarea {...field} {...props} id={field.name} value={field.value} resize="vertical" />
         ) : (
-          <Input {...field} {...props} id={field.name} value={field.value} />
+          <Input
+            {...field}
+            {...props}
+            id={field.name}
+            value={field.value}
+            autoComplete={field.name}
+          />
         )}
         {!!error ? <FormErrorMessage>{error}</FormErrorMessage> : null}
       </FormControl>
