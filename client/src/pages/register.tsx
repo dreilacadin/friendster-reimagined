@@ -10,8 +10,6 @@ import {
 } from "@chakra-ui/react"
 import { Form, Formik } from "formik"
 import { useRouter } from "next/router"
-import { parse } from "path"
-import { off } from "process"
 import { useEffect, useState } from "react"
 import DateDropDown from "../components/DateDropDown/DateDropDown"
 import GenderMenu from "../components/GenderMenu/GenderMenu"
@@ -35,10 +33,6 @@ const Register = () => {
     const ISODateString = new Date(year, month, day).toISOString()
     setParsedDate(ISODateString)
   }, [selectedDate])
-
-  useEffect(() => {
-    console.log(gender)
-  }, [gender])
 
   return (
     <Layout exclude={["header"]}>

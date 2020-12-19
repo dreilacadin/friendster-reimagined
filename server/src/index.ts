@@ -8,15 +8,20 @@ import { TryDBConnect } from "./helpers/database"
 import { UserResolver } from "./resolvers/user"
 import { TestimonialResolver } from "./resolvers/testimonial"
 import session from "express-session"
+import Redis from "ioredis"
 import connectRedis from "connect-redis"
-import redis from "redis"
+
 import { COOKIE_NAME, __prod__ } from "./constants"
 
 export const app: express.Application = express()
 
 const main = async () => {
   let RedisStore = connectRedis(session)
-  let redisClient = redis.createClient()
+  let redis = new Redis()
+
+  redis.on("error", function (error) {
+    console.error(error)
+  })
 
   app.set("trust proxy", 1)
 
@@ -31,7 +36,7 @@ const main = async () => {
   app.use(
     session({
       name: COOKIE_NAME,
-      store: new RedisStore({ client: redisClient, disableTouch: true }),
+      store: new RedisStore({ client: redis, disableTouch: true }),
       cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
         httpOnly: true,
@@ -57,7 +62,8 @@ const main = async () => {
     }),
     context: ({ req, res }) => ({
       req,
-      res
+      res,
+      redis
     })
   })
 

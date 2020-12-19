@@ -1,11 +1,16 @@
 import { ApolloError } from "apollo-server-express"
 import argon2 from "argon2"
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql"
-import { COOKIE_NAME } from "../constants"
+import { v4 } from "uuid"
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants"
 import { User } from "../entity/User"
+import { ChangePasswordInput } from "../InputTypes/ChangePasswordInput"
 import { LoginInput } from "../InputTypes/LoginInput"
 import { RegisterInput } from "../InputTypes/RegisterInput"
 import { MyContext } from "../types"
+import { forgotPasswordTemplate } from "../utils/EmailTemplates/forgotPasswordTemplate"
+import { sendEmail } from "../utils/sendEmail"
+import { validateChangePassword } from "../utils/validateChangePassword"
 import { validateLogin } from "../utils/validateLogin"
 import { validateRegister } from "../utils/validateRegister"
 
@@ -27,6 +32,9 @@ class UserResponse {
 
 @Resolver(User)
 export class UserResolver {
+  // =======================
+  // Queries
+  // =======================
   @Query(() => User, { nullable: true })
   me(@Ctx() { req }: MyContext) {
     if (!req.session.userId) {
@@ -36,6 +44,9 @@ export class UserResolver {
     return User.findOne(req.session.userId)
   }
 
+  // ========================
+  // Mutations
+  // ========================
   @Mutation(() => UserResponse)
   async register(
     @Arg("options") options: RegisterInput,
@@ -139,5 +150,64 @@ export class UserResolver {
     const response = await User.delete({})
     if (!response) return false
     return true
+  }
+
+  @Mutation(() => Boolean)
+  async forgotPassword(@Ctx() { redis }: MyContext, @Arg("email") email: string) {
+    const user = await User.findOne({ where: { email } })
+
+    if (!user) {
+      // The email is not in the db. Don't tell the user that the email doesn't exist
+      // so that they cannot fish for available emails
+      console.log("email not found")
+      return true
+    }
+
+    const { firstName, lastName } = user
+    const token = v4()
+
+    await redis.set(FORGOT_PASSWORD_PREFIX + token, user.id, "ex", 1000 * 60 * 60 * 24 * 3) // 3 days
+
+    await sendEmail(email, forgotPasswordTemplate({ firstName, lastName, token }))
+
+    return true
+  }
+
+  @Mutation(() => UserResponse)
+  async changePassword(
+    @Arg("token") token: string,
+    @Arg("options") options: ChangePasswordInput,
+    @Ctx() { redis, req }: MyContext
+  ): Promise<UserResponse> {
+    const errors = validateChangePassword(options)
+
+    if (errors) {
+      return { errors }
+    }
+
+    const key = FORGOT_PASSWORD_PREFIX + token
+
+    const userId = await redis.get(key)
+
+    if (!userId) {
+      return {
+        errors: [{ field: "token", message: "Expired or invalid token" }]
+      }
+    }
+
+    const user = await User.findOne({ where: { id: userId } })
+
+    if (!user) {
+      return { errors: [{ field: "token", message: "User no longer exists" }] }
+    }
+
+    await User.update(userId, { password: await argon2.hash(options.newPassword) })
+
+    await redis.del(key)
+
+    // login user after they change password
+    req.session.userId = user.id
+
+    return { user }
   }
 }
