@@ -35,7 +35,8 @@ const ForgotPassword = () => {
             {({ isSubmitting }) =>
               complete ? (
                 <Box mt={3}>
-                  If an account with your email exists, we sent you a link to reset your password.
+                  If an account with your email exists, you will receive an email with a link to
+                  reset your password.
                 </Box>
               ) : (
                 <Form>
