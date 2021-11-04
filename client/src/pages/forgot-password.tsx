@@ -1,10 +1,11 @@
-import { Heading, Box, Button, Flex } from "@chakra-ui/react"
+import { Heading, Box, Button, Flex, Text, Link } from "@chakra-ui/react"
 import { Formik, Form } from "formik"
 import { useState } from "react"
 import InputField from "../components/InputField"
 import Layout from "../components/Layout/Layout"
 import { useForgotPasswordMutation } from "../generated/graphql"
 import * as Yup from "yup"
+import NextLink from "next/link"
 
 const ChangePasswordSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required")
@@ -37,6 +38,13 @@ const ForgotPassword = () => {
                 <Box mt={3}>
                   If an account with your email exists, you will receive an email with a link to
                   reset your password.
+                  <Text mt={3}>
+                    Click&nbsp;
+                    <NextLink href="/">
+                      <Link color="teal.500">here</Link>
+                    </NextLink>
+                    &nbsp;to go home
+                  </Text>
                 </Box>
               ) : (
                 <Form>

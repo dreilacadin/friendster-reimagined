@@ -3,6 +3,7 @@ import argon2 from "argon2"
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql"
 import { v4 } from "uuid"
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "../constants"
+import { Profile } from "../entity/Profile"
 import { User } from "../entity/User"
 import { ChangePasswordInput } from "../InputTypes/ChangePasswordInput"
 import { LoginInput } from "../InputTypes/LoginInput"
@@ -44,6 +45,17 @@ export class UserResolver {
     return User.findOne(req.session.userId)
   }
 
+  @Query(() => User)
+  async getUser(@Arg("username") username: string) {
+    if (!username || typeof username !== "string") {
+      return {
+        errors: [{ field: "username", message: "invalid username" }]
+      }
+    }
+
+    return await User.findOne({ where: { username } })
+  }
+
   // ========================
   // Mutations
   // ========================
@@ -62,6 +74,7 @@ export class UserResolver {
     let user
 
     try {
+      const profile = await Profile.create().save()
       user = await User.create({
         email,
         username,
@@ -69,6 +82,7 @@ export class UserResolver {
         lastName,
         dateOfBirth,
         gender,
+        profile,
         password: hashedPassword
       }).save()
     } catch (err) {

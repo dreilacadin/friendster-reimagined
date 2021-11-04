@@ -44,7 +44,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
 
   return (
     <Menu>
-      <MenuButton as={Button} variant="ghost" p={3}>
+      <MenuButton as={Button} variant="ghost">
         <Flex alignItems="center">
           <Box mr="3">
             <Text fontWeight="semibold">{`${user.firstName} ${user.lastName}`}</Text>

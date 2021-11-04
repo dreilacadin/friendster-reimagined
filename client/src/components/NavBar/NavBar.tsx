@@ -26,15 +26,13 @@ const Navbar: React.FC<NavbarProps> = ({ props }) => {
       {...props}
     >
       <Flex align="center" justify="space-between" width="100%">
-        <Flex align="center" mr={5}>
-          <NextLink href="/">
-            <Link>
-              <Heading as="h1" size="md">
-                friendster
-              </Heading>
-            </Link>
-          </NextLink>
-        </Flex>
+        <NextLink href="/">
+          <Link>
+            <Heading as="h1" size="md">
+              friendster
+            </Heading>
+          </Link>
+        </NextLink>
         {data?.me && <SearchBar />}
         {data?.me && <UserMenu user={data.me} />}
       </Flex>

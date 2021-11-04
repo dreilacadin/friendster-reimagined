@@ -8,9 +8,8 @@ export default {
   username: process.env.DB_USERNAME || "postgres",
   password: process.env.DB_PASSWORD || "postgres",
   database: process.env.DB_NAME || "node_project",
-  synchronize: !process.env.DB_NO_SYNC,
+  synchronize: true,
   logging: !__prod__,
-  autoReconnect: true,
   entities: [`dist/entity/*.js`],
   migrations: [`dist/migration/*.js`],
   cli: {

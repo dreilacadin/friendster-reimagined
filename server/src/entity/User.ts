@@ -4,10 +4,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from "typeorm"
 import { UserGender } from "../enums"
+import { Profile } from "./Profile"
 
 registerEnumType(UserGender, {
   name: "UserGender",
@@ -41,12 +44,16 @@ export class User extends BaseEntity {
   @Column()
   dateOfBirth!: Date
 
-  @Field(() => UserGender, { nullable: true })
+  @Field(() => String, { nullable: true })
   @Column()
   gender: UserGender
 
   @Column()
   password!: string
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  @JoinColumn()
+  profile: Profile
 
   @Field()
   @CreateDateColumn()

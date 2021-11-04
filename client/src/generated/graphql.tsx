@@ -18,7 +18,13 @@ export type Scalars = {
 export type Query = {
   __typename?: 'Query';
   me?: Maybe<User>;
+  getUser?: Maybe<User>;
   testimonials: Array<Testimonial>;
+};
+
+
+export type QueryGetUserArgs = {
+  username: Scalars['String'];
 };
 
 export type User = {
@@ -29,18 +35,11 @@ export type User = {
   firstName: Scalars['String'];
   lastName: Scalars['String'];
   dateOfBirth: Scalars['DateTime'];
-  gender?: Maybe<UserGender>;
+  gender?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
 };
 
-
-/** Gender options */
-export enum UserGender {
-  Male = 'MALE',
-  Female = 'FEMALE',
-  Custom = 'CUSTOM'
-}
 
 export type Testimonial = {
   __typename?: 'Testimonial';
@@ -123,6 +122,11 @@ export type ChangePasswordInput = {
 export type TestimonialInput = {
   content: Scalars['String'];
 };
+
+export type FullUserFragment = (
+  { __typename?: 'User' }
+  & Pick<User, 'id' | 'username' | 'email' | 'firstName' | 'lastName' | 'dateOfBirth' | 'gender' | 'createdAt' | 'updatedAt'>
+);
 
 export type RegularErrorFragment = (
   { __typename?: 'FieldError' }
@@ -211,6 +215,19 @@ export type RegisterMutation = (
   ) }
 );
 
+export type GetUserQueryVariables = Exact<{
+  username: Scalars['String'];
+}>;
+
+
+export type GetUserQuery = (
+  { __typename?: 'Query' }
+  & { getUser?: Maybe<(
+    { __typename?: 'User' }
+    & FullUserFragment
+  )> }
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -222,6 +239,19 @@ export type MeQuery = (
   )> }
 );
 
+export const FullUserFragmentDoc = gql`
+    fragment FullUser on User {
+  id
+  username
+  email
+  firstName
+  lastName
+  dateOfBirth
+  gender
+  createdAt
+  updatedAt
+}
+    `;
 export const RegularErrorFragmentDoc = gql`
     fragment RegularError on FieldError {
   field
@@ -411,6 +441,39 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const GetUserDocument = gql`
+    query GetUser($username: String!) {
+  getUser(username: $username) {
+    ...FullUser
+  }
+}
+    ${FullUserFragmentDoc}`;
+
+/**
+ * __useGetUserQuery__
+ *
+ * To run a query within a React component, call `useGetUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserQuery({
+ *   variables: {
+ *      username: // value for 'username'
+ *   },
+ * });
+ */
+export function useGetUserQuery(baseOptions: Apollo.QueryHookOptions<GetUserQuery, GetUserQueryVariables>) {
+        return Apollo.useQuery<GetUserQuery, GetUserQueryVariables>(GetUserDocument, baseOptions);
+      }
+export function useGetUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetUserQuery, GetUserQueryVariables>) {
+          return Apollo.useLazyQuery<GetUserQuery, GetUserQueryVariables>(GetUserDocument, baseOptions);
+        }
+export type GetUserQueryHookResult = ReturnType<typeof useGetUserQuery>;
+export type GetUserLazyQueryHookResult = ReturnType<typeof useGetUserLazyQuery>;
+export type GetUserQueryResult = Apollo.QueryResult<GetUserQuery, GetUserQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
